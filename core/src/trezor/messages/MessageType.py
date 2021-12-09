@@ -67,6 +67,7 @@ OwnershipId: Literal[44] = 44
 GetOwnershipProof: Literal[49] = 49
 OwnershipProof: Literal[50] = 50
 AuthorizeCoinJoin: Literal[51] = 51
+
 CipherKeyValue: Literal[23] = 23
 CipheredKeyValue: Literal[48] = 48
 SignIdentity: Literal[53] = 53
@@ -92,7 +93,16 @@ DebugLinkRecordScreen: Literal[9003] = 9003
 DebugLinkShowText: Literal[9004] = 9004
 DebugLinkEraseSdCard: Literal[9005] = 9005
 DebugLinkWatchLayout: Literal[9006] = 9006
+
 if not utils.BITCOIN_ONLY:
+    ConfluxGetAddress: Literal[10112] = 10112
+    ConfluxAddress: Literal[10113] = 10113
+    ConfluxSignTx: Literal[10114] = 10114
+    ConfluxTxRequest: Literal[10115] = 10115
+    ConfluxTxAck: Literal[101166] = 10116
+    ConfluxSignMessage: Literal[10117] = 10117
+    ConfluxSignMessageCIP23: Literal[10118] = 10118
+    ConfluxMessageSignature: Literal[101119] = 10119
     EthereumGetPublicKey: Literal[450] = 450
     EthereumPublicKey: Literal[451] = 451
     EthereumGetAddress: Literal[56] = 56
