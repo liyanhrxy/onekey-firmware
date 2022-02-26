@@ -131,6 +131,7 @@ fn generate_micropython_bindings() {
             "-I../trezorhal",
             "-I../../build/firmware",
             "-I../../vendor/micropython",
+            "-I../../vendor/lv_binding_micropython",
             "-I../../vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Inc",
             "-I../../vendor/micropython/lib/stm32lib/CMSIS/STM32F4xx/Include",
             "-I../../vendor/micropython/lib/cmsis/inc",
@@ -165,6 +166,7 @@ fn generate_micropython_bindings() {
             "-I../../build/unix",
             "-I../../vendor/micropython",
             "-I../../vendor/micropython/ports/unix",
+            "-I../../vendor/lv_binding_micropython",
         ]);
     }
 

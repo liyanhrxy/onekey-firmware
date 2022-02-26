@@ -7,15 +7,118 @@ BITCOIN_ONLY = ARGUMENTS.get('BITCOIN_ONLY', '0')
 EVERYTHING = BITCOIN_ONLY != '1'
 TREZOR_MODEL = ARGUMENTS.get('TREZOR_MODEL', 'T')
 UI2 = ARGUMENTS.get('UI2', '0') == '1' or TREZOR_MODEL == '1'
+UNAME_S = ARGUMENTS.get('UNAME_S', 'Linux')
 
 FEATURE_FLAGS = {
-    "SECP256K1_ZKP": True,  # required for trezor.crypto.curve.bip340 (BIP340/Taproot)
+    "SECP256K1_ZKP": True,
+    "LODEPNG": True,
+    "TREZOR_UI": True,
+    "LVGL": True,
 }
-
+SOURCE_MOD = []
 CCFLAGS_MOD = ''
 CPPPATH_MOD = []
+
+# Binding generate env
+LVGL_BINDING_DIR = 'vendor/lv_binding_micropython'
+binding_env = Environment(ENV=os.environ)
+binding_env.Replace(
+    CC=os.getenv('CC') or 'gcc',
+    PYTHON='python3',
+    CFLAGS=' -E  -Wno-unused-function -DPYCPARSER -x c ',
+    INC=f' -I{LVGL_BINDING_DIR}/pycparser/utils/fake_libc_include ',
+    LODEPNG_DEFINE_FLAG=' -DLODEPNG_NO_COMPILE_ENCODER -DLODEPNG_NO_COMPILE_DISK -DLODEPNG_NO_COMPILE_ALLOCATORS ',
+)
+
+BUILD_DIR = ARGUMENTS.get('UNIX_BUILD_DIR', 'build/unix')
+#====================================LVGL BINDING BEGIN===========================================
+if FEATURE_FLAGS["LVGL"]:
+    LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
+    LVGL_MPY = 'lvgl/lv_mpy.c'
+    LVGL_PP = f'{BUILD_DIR}/lvgl/lvgl.pp.c'
+    LVGL_MPY_METADATA = f'{BUILD_DIR}/lvgl/lv_mpy.json'
+    SOURCE_LVGL = Glob(f'{LVGL_DIR}/src/**/*.c')
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/draw/sdl/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/draw/sw/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/draw/nxp_pxp/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/draw/nxp_vglite/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/layouts/grid/lv_grid.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/layouts/flex/lv_flex.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/libs/**/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/others/**/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/themes/**/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/widgets/**/*.c'))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_BINDING_DIR}/driver/SDL/*.c'))
+    if UNAME_S == 'Linux':
+        SOURCE_LVGL.extend(Glob(f'{LVGL_BINDING_DIR}/driver/linux/modfb.c'))
+
+    # generate LVGL mp bindings
+    lvgl = binding_env.Command(
+        target=LVGL_MPY,
+        source='',
+        action=[
+            f'$CC $CFLAGS $INC -I{LVGL_BINDING_DIR} {LVGL_DIR}/lvgl.h > {LVGL_PP}',
+            f'$PYTHON {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} {LVGL_DIR}/lvgl.h > $TARGET',
+        ]
+    )
+    SOURCE_MOD_LVGL = BUILD_DIR + "/" + LVGL_MPY
+    SOURCE_LVGL.extend([SOURCE_MOD_LVGL])
+
+#====================================LVGL BINDING END===========================================
+
+#====================================LODEPNG BINDING BEGAIN===========================================
+if FEATURE_FLAGS["LODEPNG"]:
+    # LODEPNG
+    LODEPNG_DIR = f'{LVGL_BINDING_DIR}/driver/png/lodepng'
+    MP_LODEPNG_C = f'{LVGL_BINDING_DIR}/driver/png/mp_lodepng.c'
+    LODEPNG_MODULE = 'lodepng/mp_lodepng.c'
+    LODEPNG_C = f'{BUILD_DIR}/lodepng/lodepng.c'
+    LODEPNG_PP = f'{BUILD_DIR}/lodepng/lodepng.pp.c'
+
+    # generate LODEPNG bindings
+    lodepng = binding_env.Command(
+        target=LODEPNG_MODULE,
+        source='',
+        action=[
+            f'cp {LODEPNG_DIR}/lodepng.cpp {LODEPNG_C}',
+            f'$CC $CFLAGS $LODEPNG_DEFINE_FLAG $INC -I{LODEPNG_DIR} {LODEPNG_DIR}/lodepng.h > {LODEPNG_PP}',
+            f'$PYTHON {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lodepng -E {LODEPNG_PP} {LODEPNG_DIR}/lodepng.h > $TARGET'
+        ]
+    )
+    SOURCE_MOD_LODEPNG = BUILD_DIR + '/' +LODEPNG_MODULE
+    SOURCE_LODEPNG = [LODEPNG_C, MP_LODEPNG_C, SOURCE_MOD_LODEPNG]
+
+#====================================LODEPN BINDING END===========================================
+if FEATURE_FLAGS["LVGL"]:
+    # LVGL include path
+    CPPPATH_MOD = [
+        '/usr/include',
+        f'{LVGL_BINDING_DIR}',
+        f'{LVGL_BINDING_DIR}/driver/png/lodepng',
+        f'{LVGL_BINDING_DIR}/driver',
+        f'{LVGL_BINDING_DIR}/driver/generic',
+        f'{LVGL_BINDING_DIR}/driver/SDL',
+        f'{LVGL_BINDING_DIR}/driver/png',
+        f'{LVGL_BINDING_DIR}/driver/png/lodepng',
+        f'{LVGL_BINDING_DIR}/lvgl',
+        f'{LVGL_BINDING_DIR}/lvgl/src/core',
+        f'{LVGL_BINDING_DIR}/lvgl/src/draw',
+        f'{LVGL_BINDING_DIR}/lvgl/src/draw/sw',
+        f'{LVGL_BINDING_DIR}/lvgl/src/draw/sdl',
+        f'{LVGL_BINDING_DIR}/lvgl/src/extra',
+        f'{LVGL_BINDING_DIR}/lvgl/src/extra/layouts',
+        f'{LVGL_BINDING_DIR}/lvgl/src/extra/libs',
+        f'{LVGL_BINDING_DIR}/lvgl/src/extra/others',
+        f'{LVGL_BINDING_DIR}/lvgl/src/extra/themes',
+        f'{LVGL_BINDING_DIR}/lvgl/src/extra/widgets',
+        f'{LVGL_BINDING_DIR}/lvgl/src/misc',
+        f'{LVGL_BINDING_DIR}/lvgl/src/hal',
+        f'{LVGL_BINDING_DIR}/lvgl/src/widgets',
+        f'{LVGL_BINDING_DIR}/lvgl/src/font',
+    ]
+
 CPPDEFINES_MOD = []
-SOURCE_MOD = [
+SOURCE_MOD += [
     'vendor/micropython/extmod/vfs_posix_file.c',
 ]
 
@@ -34,7 +137,7 @@ SOURCE_MOD += [
 ]
 
 # modtrezorcrypto
-CCFLAGS_MOD += '-Wno-sequence-point '
+CCFLAGS_MOD += ' -Wno-sequence-point '
 CPPPATH_MOD += [
     'vendor/trezor-crypto',
 ]
@@ -153,39 +256,43 @@ if TREZOR_MODEL == "T":
     ]
 
 # modtrezorui
-CPPPATH_MOD += [
-        'vendor/micropython/lib/uzlib',
-]
-CPPDEFINES_MOD += [
-    'TREZOR_FONT_BOLD_ENABLE',
-    'TREZOR_FONT_NORMAL_ENABLE',
-    'TREZOR_FONT_MONO_ENABLE',
-]
-SOURCE_MOD += [
-    'embed/extmod/modtrezorui/display.c',
-    'embed/extmod/modtrezorui/font_bitmap.c',
-    'embed/extmod/modtrezorui/font_roboto_bold_20.c',
-    'embed/extmod/modtrezorui/font_roboto_regular_20.c',
-    'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
-    'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
-    'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
-    'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
-    'embed/extmod/modtrezorui/modtrezorui.c',
-    'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
-    'vendor/micropython/lib/uzlib/adler32.c',
-    'vendor/micropython/lib/uzlib/crc32.c',
-    'vendor/micropython/lib/uzlib/tinflate.c',
-]
-if UI2:
+if FEATURE_FLAGS["TREZOR_UI"]:
+    CPPPATH_MOD += [
+            'vendor/micropython/lib/uzlib',
+    ]
     CPPDEFINES_MOD += [
-        'TREZOR_FONT_MEDIUM_ENABLE',
-        'TREZOR_UI2',
+        'TREZOR_FONT_BOLD_ENABLE',
+        'TREZOR_FONT_NORMAL_ENABLE',
+        'TREZOR_FONT_MONO_ENABLE',
     ]
     SOURCE_MOD += [
-        'embed/extmod/modtrezorui/font_tthoves_bold_16.c',
-        'embed/extmod/modtrezorui/font_tthoves_medium_20.c',
-        'embed/extmod/modtrezorui/font_tthoves_regular_18.c',
+        'embed/extmod/modtrezorui/display.c',
+        'embed/extmod/modtrezorui/font_bitmap.c',
+        'embed/extmod/modtrezorui/font_roboto_bold_20.c',
+        'embed/extmod/modtrezorui/font_roboto_regular_20.c',
+        'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
+        'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
+        'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
+        'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
+        'embed/extmod/modtrezorui/modtrezorui.c',
+        'vendor/micropython/lib/uzlib/adler32.c',
+        'vendor/micropython/lib/uzlib/crc32.c',
+        'vendor/micropython/lib/uzlib/tinflate.c',
     ]
+    if not FEATURE_FLAGS["TREZOR_UI"]:
+        SOURCE_MOD += [
+            'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+        ]
+    if UI2:
+        CPPDEFINES_MOD += [
+            'TREZOR_FONT_MEDIUM_ENABLE',
+            'TREZOR_UI2',
+        ]
+        SOURCE_MOD += [
+            'embed/extmod/modtrezorui/font_tthoves_bold_16.c',
+            'embed/extmod/modtrezorui/font_tthoves_medium_20.c',
+            'embed/extmod/modtrezorui/font_tthoves_regular_18.c',
+        ]
 if FROZEN:
     CPPDEFINES_MOD += ['TREZOR_EMULATOR_FROZEN']
 
@@ -198,7 +305,7 @@ SOURCE_MOD += [
 SOURCE_MOD += [
     'embed/extmod/rustmods/modtrezorproto.c',
 ]
-if UI2:
+if UI2 and FEATURE_FLAGS['TREZOR_UI']:
     SOURCE_MOD += [
         'embed/extmod/rustmods/modtrezorui2.c',
     ]
@@ -356,14 +463,14 @@ if TREZOR_MODEL == 'T':
         'embed/unix/sdcard.c',
     ]
 
-SOURCE_QSTR = SOURCE_MOD + SOURCE_MICROPYTHON + SOURCE_UNIX
+SOURCE_QSTR = SOURCE_MOD + SOURCE_MICROPYTHON + SOURCE_UNIX + SOURCE_LODEPNG + SOURCE_LVGL
+# remove because it's conflict with lvgl
+# if PYOPT == '0' or not FROZEN:
+#     STATIC="-DSTATIC=static"
+# else:
+#     STATIC=""
 
-if PYOPT == '0' or not FROZEN:
-    STATIC="-DSTATIC="
-else:
-    STATIC=""
-
-env = Environment(ENV=os.environ, CFLAGS='%s -DPYOPT=%s -DBITCOIN_ONLY=%s %s' % (ARGUMENTS.get('CFLAGS', ''), PYOPT, BITCOIN_ONLY, STATIC))
+env = Environment(ENV=os.environ, CFLAGS='%s -DPYOPT=%s -DBITCOIN_ONLY=%s' % (ARGUMENTS.get('CFLAGS', ''), PYOPT, BITCOIN_ONLY))
 
 env.Tool('micropython')
 
@@ -419,12 +526,12 @@ env.Replace(
     '-std=gnu99 -Wall -Werror -Wuninitialized -Wno-missing-braces '
     '-fdata-sections -ffunction-sections -fPIE ' + CCFLAGS_MOD,
     CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
-    LIBS=['m'],
+    LIBS=['m', 'pthread'],
     CPPPATH=[
         '.',
         'embed/rust',
         'embed/unix',
-        'embed/extmod/modtrezorui',
+        'embed/extmod/modtrezorui' if FEATURE_FLAGS['TREZOR_UI'] else '',
         'vendor/micropython',
         'vendor/micropython/ports/unix',
         'vendor/micropython/lib/mp-readline',
@@ -433,11 +540,12 @@ env.Replace(
         'TREZOR_EMULATOR',
         ('TREZOR_MODEL', '$TREZOR_MODEL'),
         ('MP_CONFIGFILE', '\\"embed/unix/mpconfigport.h\\"'),
+        'LODEPNG_NO_COMPILE_ALLOCATORS',
     ] + CPPDEFINES_MOD,
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
 try:
-    env.ParseConfig('pkg-config --cflags --libs sdl2 SDL2_image')
+    env.ParseConfig('pkg-config --cflags --libs sdl2 SDL2_image ')
 except OSError:
     print("SDL2 not installed, Emulator build is not possible")
 
@@ -494,6 +602,9 @@ hdr_moduledefs = env.Command(
     target='genhdr/moduledefs.h',
     source=SOURCE_QSTR,
     action='$MAKEMODULEDEFS --vpath="." $SOURCES > $TARGET', )
+
+Requires(hdr_moduledefs, lvgl)
+Requires(hdr_moduledefs, lodepng)
 
 env.Ignore(hdr_moduledefs, hdr_moduledefs)
 env.Ignore(hdr_moduledefs, qstr_collected)
@@ -580,6 +691,14 @@ if FROZEN:
             SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash.py',
         ])
     )
+    # lvgl frozen
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/driver/linux/evdev.py'))
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/driver/linux/lv_timer.py'))
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/display_driver_utils.py'))
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/display_driver.py'))
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/imagetools.py'))
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/fs_driver.py'))
+    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/lv_utils.py'))
 
     if EVERYTHING:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/binance/*.py'))
@@ -709,6 +828,10 @@ obj_program.extend(env.Object(source=SOURCE_MICROPYTHON))
 obj_program.extend(env.Object(source=SOURCE_UNIX))
 if FROZEN:
     obj_program.extend(env.Object(source=source_mpyc))
+if FEATURE_FLAGS["LVGL"]:
+    obj_program.extend(env.Object(source=SOURCE_LVGL, CCFLAGS='$CCFLAGS -Wno-unused-function'))
+if FEATURE_FLAGS["LODEPNG"]:
+    obj_program.extend(env.Object(source=SOURCE_LODEPNG, CCFLAGS='$CCFLAGS -Wno-unused-function'))
 
 env.Depends(obj_program, qstr_generated)
 if FEATURE_FLAGS["SECP256K1_ZKP"]:

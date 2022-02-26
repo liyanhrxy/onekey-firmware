@@ -208,6 +208,10 @@ trezor.ui.layouts.tt_v2
 import trezor.ui.layouts.tt_v2
 trezor.ui.loader
 import trezor.ui.loader
+trezor.ui.lvgl.lv_colors
+import trezor.ui.lvgl.lv_colors
+trezor.ui.lvgl.utils
+import trezor.ui.lvgl.utils
 trezor.ui.popup
 import trezor.ui.popup
 trezor.ui.qr
