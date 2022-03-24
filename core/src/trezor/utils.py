@@ -77,11 +77,12 @@ class unimport:
 
     def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:
         assert self.mods is not None
+        from apps.homescreen import signal_channel
+        signal_channel.publish("stop started task")
         unimport_end(self.mods, collect=False)
         self.mods.clear()
         self.mods = None
         gc.collect()
-
 
 def presize_module(modname: str, size: int) -> None:
     """Ensure the module's dict is preallocated to an expected size.

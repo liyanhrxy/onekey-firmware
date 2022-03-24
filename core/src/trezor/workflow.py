@@ -82,7 +82,8 @@ def start_default() -> None:
     if not default_task:
         default_task = loop.spawn(default_constructor())
         if __debug__:
-            log.debug(__name__, "start default: %s", default_task.task)
+            # log.debug(__name__, "start default: %s", default_task.task)
+            pass
         default_task.set_finalizer(_finalize_default)
     else:
         if __debug__:
@@ -144,7 +145,8 @@ def _finalize_default(task: loop.spawn) -> None:
     assert default_constructor is not None  # it should always be configured
 
     if __debug__:
-        log.debug(__name__, "default closed: %s", task.task)
+        # log.debug(__name__, "default closed: %s", task.task)
+        pass
     default_task = None
 
     if not tasks:

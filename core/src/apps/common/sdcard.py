@@ -1,7 +1,7 @@
 import storage.sd_salt
 from storage.sd_salt import SD_CARD_HOT_SWAPPABLE
 from trezor import io, sdcard, ui, wire
-from trezor.ui.layouts import confirm_action, show_error_and_raise
+# from trezor.ui.layouts import confirm_action, show_error_and_raise
 
 
 class SdCardUnavailable(wire.ProcessError):
@@ -10,103 +10,109 @@ class SdCardUnavailable(wire.ProcessError):
 
 async def _confirm_retry_wrong_card(ctx: wire.GenericContext) -> None:
     if SD_CARD_HOT_SWAPPABLE:
-        await confirm_action(
-            ctx,
-            "warning_wrong_sd",
-            "SD card protection",
-            action="Wrong SD card.",
-            description="Please insert the correct SD card for this device.",
-            verb="Retry",
-            verb_cancel="Abort",
-            icon=ui.ICON_WRONG,
-            larger_vspace=True,
-            exc=SdCardUnavailable("Wrong SD card."),
-        )
+        # await confirm_action(
+        #     ctx,
+        #     "warning_wrong_sd",
+        #     "SD card protection",
+        #     action="Wrong SD card.",
+        #     description="Please insert the correct SD card for this device.",
+        #     verb="Retry",
+        #     verb_cancel="Abort",
+        #     icon=ui.ICON_WRONG,
+        #     larger_vspace=True,
+        #     exc=SdCardUnavailable("Wrong SD card."),
+        # )
+        print("SD_CARD_HOT_SWAPPABLE")
     else:
-        await show_error_and_raise(
-            ctx,
-            "warning_wrong_sd",
-            header="SD card protection",
-            subheader="Wrong SD card.",
-            content="Please unplug the\ndevice and insert the correct SD card.",
-            exc=SdCardUnavailable("Wrong SD card."),
-        )
+        # await show_error_and_raise(
+        #     ctx,
+        #     "warning_wrong_sd",
+        #     header="SD card protection",
+        #     subheader="Wrong SD card.",
+        #     content="Please unplug the\ndevice and insert the correct SD card.",
+        #     exc=SdCardUnavailable("Wrong SD card."),
+        # )
+        print(f"========{SD_CARD_HOT_SWAPPABLE}========")
 
 
 async def _confirm_retry_insert_card(ctx: wire.GenericContext) -> None:
     if SD_CARD_HOT_SWAPPABLE:
-        await confirm_action(
-            ctx,
-            "warning_no_sd",
-            "SD card protection",
-            action="SD card required.",
-            description="Please insert your SD card.",
-            verb="Retry",
-            verb_cancel="Abort",
-            icon=ui.ICON_WRONG,
-            larger_vspace=True,
-            exc=SdCardUnavailable("SD card required."),
-        )
+        # await confirm_action(
+        #     ctx,
+        #     "warning_no_sd",
+        #     "SD card protection",
+        #     action="SD card required.",
+        #     description="Please insert your SD card.",
+        #     verb="Retry",
+        #     verb_cancel="Abort",
+        #     icon=ui.ICON_WRONG,
+        #     larger_vspace=True,
+        #     exc=SdCardUnavailable("SD card required."),
+        # )
+        print("SD_CARD_HOT_SWAPPABLE=====L52")
     else:
-        await show_error_and_raise(
-            ctx,
-            "warning_no_sd",
-            header="SD card protection",
-            subheader="SD card required.",
-            content="Please unplug the\ndevice and insert your SD card.",
-            exc=SdCardUnavailable("SD card required."),
-        )
+        # await show_error_and_raise(
+        #     ctx,
+        #     "warning_no_sd",
+        #     header="SD card protection",
+        #     subheader="SD card required.",
+        #     content="Please unplug the\ndevice and insert your SD card.",
+        #     exc=SdCardUnavailable("SD card required."),
+        # )
+        print(f"========{SD_CARD_HOT_SWAPPABLE}========L62")
 
 
 async def _confirm_format_card(ctx: wire.GenericContext) -> None:
     # Format card? yes/no
-    await confirm_action(
-        ctx,
-        "warning_format_sd",
-        "SD card error",
-        action="Unknown filesystem.",
-        description="Use a different card or format the SD card to the FAT32 filesystem.",
-        icon=ui.ICON_WRONG,
-        icon_color=ui.RED,
-        verb="Format",
-        verb_cancel="Cancel",
-        larger_vspace=True,
-        exc=SdCardUnavailable("SD card not formatted."),
-    )
+    # await confirm_action(
+    #     ctx,
+    #     "warning_format_sd",
+    #     "SD card error",
+    #     action="Unknown filesystem.",
+    #     description="Use a different card or format the SD card to the FAT32 filesystem.",
+    #     icon=ui.ICON_WRONG,
+    #     icon_color=ui.RED,
+    #     verb="Format",
+    #     verb_cancel="Cancel",
+    #     larger_vspace=True,
+    #     exc=SdCardUnavailable("SD card not formatted."),
+    # )
 
     # Confirm formatting
-    await confirm_action(
-        ctx,
-        "confirm_format_sd",
-        "Format SD card",
-        action="All data on the SD card will be lost.",
-        description="Do you really want to format the SD card?",
-        reverse=True,
-        verb="Format SD card",
-        icon=ui.ICON_WIPE,
-        icon_color=ui.RED,
-        hold=True,
-        larger_vspace=True,
-        exc=SdCardUnavailable("SD card not formatted."),
-    )
+    # await confirm_action(
+    #     ctx,
+    #     "confirm_format_sd",
+    #     "Format SD card",
+    #     action="All data on the SD card will be lost.",
+    #     description="Do you really want to format the SD card?",
+    #     reverse=True,
+    #     verb="Format SD card",
+    #     icon=ui.ICON_WIPE,
+    #     icon_color=ui.RED,
+    #     hold=True,
+    #     larger_vspace=True,
+    #     exc=SdCardUnavailable("SD card not formatted."),
+    # )
+    pass
 
 
 async def confirm_retry_sd(
     ctx: wire.GenericContext,
     exc: wire.ProcessError = SdCardUnavailable("Error accessing SD card."),
 ) -> None:
-    await confirm_action(
-        ctx,
-        "warning_sd_retry",
-        "SD card problem",
-        action=None,
-        description="There was a problem accessing the SD card.",
-        icon=ui.ICON_WRONG,
-        icon_color=ui.RED,
-        verb="Retry",
-        verb_cancel="Abort",
-        exc=exc,
-    )
+    # await confirm_action(
+    #     ctx,
+    #     "warning_sd_retry",
+    #     "SD card problem",
+    #     action=None,
+    #     description="There was a problem accessing the SD card.",
+    #     icon=ui.ICON_WRONG,
+    #     icon_color=ui.RED,
+    #     verb="Retry",
+    #     verb_cancel="Abort",
+    #     exc=exc,
+    # )
+    pass
 
 
 async def ensure_sdcard(
@@ -122,7 +128,8 @@ async def ensure_sdcard(
     mounted.
     """
     while not sdcard.is_present():
-        await _confirm_retry_insert_card(ctx)
+        # await _confirm_retry_insert_card(ctx)
+        print(f"sdcard.is_present()===={sdcard.is_present()}")
 
     if not ensure_filesystem:
         return
@@ -139,7 +146,7 @@ async def ensure_sdcard(
                 # no error when mounting
                 return
 
-            await _confirm_format_card(ctx)
+            # await _confirm_format_card(ctx)
 
             # Proceed to formatting. Failure is caught by the outside OSError handler
             with sdcard.filesystem(mounted=False):

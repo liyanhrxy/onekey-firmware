@@ -12,39 +12,8 @@ import trezor
 from trezor import utils, log
 # we need space for 30 items in the trezor module
 utils.presize_module("trezor", 30)
-
-if utils.EMULATOR:
-    def emulate_init():
-        import lvgl as lv
-        lv.init()
-        import SDL
-        SDL.init()
-
-        # Register SDL display driver.
-        draw_buf = lv.disp_draw_buf_t()
-        buf1_1 = bytearray(480*10)
-        draw_buf.init(buf1_1, None, len(buf1_1)//4)
-        disp_drv = lv.disp_drv_t()
-        disp_drv.init()
-        disp_drv.draw_buf = draw_buf
-        disp_drv.flush_cb = SDL.monitor_flush
-        disp_drv.hor_res = 480
-        disp_drv.ver_res = 320
-        disp_drv.register()
-
-        # Regsiter SDL mouse driver
-
-        indev_drv = lv.indev_drv_t()
-        indev_drv.init()
-        indev_drv.type = lv.INDEV_TYPE.POINTER
-        indev_drv.read_cb = SDL.mouse_read
-        indev_drv.register()
-        log.info('emulate_init', 'initialized successfully')
-
-    try:
-        emulate_init()
-    except:
-        log.error('emulate_init', 'failed to initialize emulator')
+# lvgl initialization
+import trezor.lvgls.scrs.common
 # storage imports storage.common, storage.cache and storage.device.
 # These import trezor, trezor.config (which is a C module), trezor.utils, and each other.
 import storage

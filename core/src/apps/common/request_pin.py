@@ -1,9 +1,10 @@
+from trezor.lvgls.scrs.pinscreen import pin_channel
 import utime
 from typing import Any, NoReturn
 
 import storage.cache
 import storage.sd_salt
-from trezor import config, wire
+from trezor import config, wire, loop
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -86,11 +87,11 @@ async def verify_user_pin(
         return
 
     if config.has_pin():
-        from trezor.ui.layouts import request_pin_on_device
+        while not pin_channel.putters:
+            await loop.sleep(25)
+        pin = await pin_channel.take()
 
-        pin = await request_pin_on_device(
-            ctx, prompt, config.get_pin_rem(), allow_cancel
-        )
+        print(f"has pin ============ {config.has_pin()}=====pin is {pin}")
         config.ensure_not_wipe_code(pin)
     else:
         pin = ""
