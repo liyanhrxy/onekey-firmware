@@ -40,6 +40,8 @@ session
 import session
 typing
 import typing
+ui
+import ui
 usb
 import usb
 storage
@@ -128,6 +130,24 @@ trezor.log
 import trezor.log
 trezor.loop
 import trezor.loop
+trezor.lvgls.__int__
+import trezor.lvgls.__int__
+trezor.lvgls.lv_colors
+import trezor.lvgls.lv_colors
+trezor.lvgls.scrs.__int__
+import trezor.lvgls.scrs.__int__
+trezor.lvgls.scrs.initscreen
+import trezor.lvgls.scrs.initscreen
+trezor.lvgls.scrs.layertop
+import trezor.lvgls.scrs.layertop
+trezor.lvgls.scrs.utils
+import trezor.lvgls.scrs.utils
+trezor.lvgls.ui
+import trezor.lvgls.ui
+trezor.lvgls.ui_images
+import trezor.lvgls.ui_images
+trezor.lvgls.utils
+import trezor.lvgls.utils
 trezor.messages
 import trezor.messages
 trezor.pin
@@ -208,10 +228,6 @@ trezor.ui.layouts.tt_v2
 import trezor.ui.layouts.tt_v2
 trezor.ui.loader
 import trezor.ui.loader
-trezor.ui.lvgl.lv_colors
-import trezor.ui.lvgl.lv_colors
-trezor.ui.lvgl.utils
-import trezor.ui.lvgl.utils
 trezor.ui.popup
 import trezor.ui.popup
 trezor.ui.qr

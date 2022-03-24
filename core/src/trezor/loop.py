@@ -186,7 +186,9 @@ def _step(task: Task, value: Any) -> None:
             result = task.send(value)
     except StopIteration as e:
         if __debug__:
-            log.debug(__name__, "finish: %s", task)
+            debug_info = f"finish: {task}"
+            # if "homescreen" not in debug_info:
+            log.debug(__name__, debug_info)
         finalize(task, e.value)
     except Exception as e:
         if __debug__:
@@ -486,7 +488,6 @@ class spawn(Syscall):
     Task is spawned only once. Multiple attempts to `await spawned_object` will return
     the original return value (or raise the original exception).
     """
-
     def __init__(self, task: Task) -> None:
         self.task = task
         self.callback: Task | None = None
@@ -496,7 +497,9 @@ class spawn(Syscall):
 
         # schedule task immediately
         if __debug__:
-            log.debug(__name__, "spawn new task: %s", task)
+            debug_info = f"spawn new task: {task}"
+            # if "homescreen" not in debug_info:
+            log.debug(__name__, debug_info)
 
         assert isinstance(task, _type_gen)
         schedule(task, finalizer=self._finalize)

@@ -200,6 +200,7 @@ ALLOW_WHILE_LOCKED = (
 
 
 def set_homescreen() -> None:
+    # TODO: SET_HOMESCREEN BY A FLAG IN THE DEVICE
     import storage.recovery
 
     if not config.is_unlocked():
@@ -208,9 +209,13 @@ def set_homescreen() -> None:
         workflow.set_default(lockscreen)
 
     elif storage.recovery.is_in_progress():
-        from apps.management.recovery_device.homescreen import recovery_homescreen
+        from apps.homescreen.homescreen import homescreen
 
-        workflow.set_default(recovery_homescreen)
+        workflow.set_default(homescreen)
+        # from apps.management.recovery_device.homescreen import recovery_homescreen
+
+        # workflow.set_default(recovery_homescreen)
+        pass
 
     else:
         from apps.homescreen.homescreen import homescreen
@@ -272,13 +277,10 @@ def get_pinlocked_handler(
 
 # this function is also called when handling ApplySettings
 def reload_settings_from_storage() -> None:
-    from trezor import ui
-
     workflow.idle_timer.set(
         storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
     )
     wire.experimental_enabled = storage.device.get_experimental_features()
-    ui.display.orientation(storage.device.get_rotation())
 
 
 def boot() -> None:

@@ -6,14 +6,15 @@ import usb
 apps.base.boot()
 
 if not utils.BITCOIN_ONLY and usb.ENABLE_IFACE_WEBAUTHN:
-    import apps.webauthn
+    # import apps.webauthn
 
-    apps.webauthn.boot()
+    # apps.webauthn.boot()
+    pass
 
-if __debug__:
-    import apps.debug
+# if __debug__:
+#     import apps.debug
 
-    apps.debug.boot()
+#     apps.debug.boot()
 
 # run main event loop and specify which screen is the default
 apps.base.set_homescreen()
