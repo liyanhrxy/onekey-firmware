@@ -87,9 +87,9 @@ async def verify_user_pin(
 
     if config.has_pin():
         from trezor.ui.layouts import request_pin_on_device
-        from lvglui.lv_layouts import lv_request_pin_on_device
+        from trezor.lvglui.lv_layouts import lv_request_pin_on_device
 
-        
+
         if utils.LVGL_UI:
             pin = await lv_request_pin_on_device(
                 ctx, prompt, config.get_pin_rem(), allow_cancel

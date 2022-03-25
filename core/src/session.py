@@ -4,11 +4,11 @@ import apps.base
 import usb
 
 import lvgl as lv
-from lvglui import lv_ui
+from trezor.lvglui import lv_ui
 
 async def lvgl_tick():
     while True:
-        lv.tick_inc(10)        
+        lv.tick_inc(10)       
         await loop.sleep(10)
         lv.timer_handler()
 

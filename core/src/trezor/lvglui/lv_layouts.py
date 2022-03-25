@@ -1,4 +1,5 @@
 from . import lv_ui
+from .scrs.pinscreen import InputPin
 from . import globalvar as gl
 from trezor import wire, log
 from trezor.enums import ButtonRequestType
@@ -25,7 +26,7 @@ async def lv_confirm_reset_device(
     ctx: wire.GenericContext, prompt: str, recovery: bool = False
 ) -> None:
     lv_screen_check("ui_reset")
-    if recovery:        
+    if recovery:
         ui_reset = lv_ui.Screen_Generic(
             cancel_btn= True,
             title= "Recovery mode",
@@ -39,20 +40,20 @@ async def lv_confirm_reset_device(
             description= prompt,
             confirm_text= "Confirm",
         )
-    
+
     gl.set_value('ui_reset',ui_reset)
 
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_reset,
             "recover_device" if recovery else "setup_device",
             ButtonRequestType.ProtectCall
             if recovery
             else ButtonRequestType.ResetDevice,
             )
-    )    
- 
+    )
+
 
 async def lv_confirm_backup(ctx: wire.GenericContext) -> bool:
     lv_screen_check("ui_backup")
@@ -115,17 +116,17 @@ async def lv_confirm_wipe_device(ctx: wire.GenericContext) -> None:
         title= "Wipe Device",
         description= "To remove all data from your device, you can reset your device to factory default.",
         confirm_text= "Wipe",
-        )    
+        )
     gl.set_value('ui_wipe',ui_wipe)
 
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_wipe,
             "confirm_wipe",
             ButtonRequestType.WipeDevice,
             )
-    ) 
+    )
 
 
 async def lv_show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) -> None:
@@ -141,12 +142,12 @@ async def lv_show_backup_warning(ctx: wire.GenericContext, slip39: bool = False)
         title= "Caution",
         description= description,
         confirm_text= "I understand",
-        )    
+        )
     gl.set_value('ui_backup_warning',ui_backup_warning)
 
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_backup_warning,
             "backup_warning",
             ButtonRequestType.ResetDevice,
@@ -169,7 +170,7 @@ async def lv_show_share_words(
         header_title = f"Group {group_index + 1} - Share {share_index + 1}"
 
     lv_screen_check("ui_show_words")
-        
+
     ui_show_words = lv_ui.Screen_ShowWords(
         title=header_title,
         description= "Write down these " + f"{len(share_words)} words:",
@@ -181,7 +182,7 @@ async def lv_show_share_words(
     # confirm the share
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_show_words,
             "backup_words",
             ButtonRequestType.ResetDevice,

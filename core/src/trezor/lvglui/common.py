@@ -1,7 +1,13 @@
 from trezor import log, wire, workflow
 from trezor.enums import ButtonRequestType
 from trezor.messages import ButtonAck, ButtonRequest
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from typing import (
+        Any,
+        Awaitable,
+    )
 def is_confirmed(x: Any) -> bool:
     return x
 
@@ -30,4 +36,4 @@ async def interact(
     br_code: ButtonRequestType = ButtonRequestType.Other,
 ) -> Any:
     await button_request(ctx, br_type, br_code)
-    return await ctx.wait(screen.lv_btn_response())        
+    return await ctx.wait(screen.lv_btn_response())
